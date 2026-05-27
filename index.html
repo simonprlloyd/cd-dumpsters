@@ -862,10 +862,11 @@ body {
 /* Hero h1 + lead */
 .hero h1 { color: var(--text) !important; }
 .hero h1 .serif {
-  background: linear-gradient(135deg, var(--blue-bright), var(--red-bright)) !important;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: var(--blue-bright) !important;
+  color: var(--blue-bright) !important;
 }
 .hero-lead { color: var(--text-dim) !important; }
 
@@ -1334,6 +1335,193 @@ body {
   .ba-label-before { left: 14px; }
   .ba-label-after { right: 14px; }
   .before-after { padding: 80px 0; }
+}
+
+/* === FIX: Scroll-reveal elements start at opacity:0 waiting for JS to add
+       .in-view. If JS is slow or fails, sections appear blank. Auto-reveal
+       them after 2s as a safety net, and immediately for reduced-motion users. === */
+@keyframes safetyReveal {
+  to { opacity: 1; transform: translateY(0); }
+}
+.section-head, .service-card, .size-card, .testimonial-card,
+.faq-item, .gallery-item, .stat-item, .contact-row {
+  animation: safetyReveal 0.5s ease 2s forwards;
+}
+.section-head.in-view, .service-card.in-view, .size-card.in-view,
+.testimonial-card.in-view, .faq-item.in-view, .gallery-item.in-view,
+.stat-item.in-view, .contact-row.in-view {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .section-head, .service-card, .size-card, .testimonial-card,
+  .faq-item, .gallery-item, .stat-item, .contact-row {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}
+
+/* === FIX: Kill ALL gradient-clip text effects sitewide. They render as blank
+       solid rectangles when background-clip:text fails for any reason
+       (cascade order, font-loading race, etc). Replace with solid colors. === */
+.hero h1 .serif,
+.section-title .gradient,
+.about-text .section-title .serif,
+.cta-card h2 .serif {
+  background: none !important;
+  background-image: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.hero h1 .serif {
+  color: #60a5fa !important; /* bright blue, readable on navy */
+}
+.section-title .gradient {
+  color: #60a5fa !important;
+}
+.about-text .section-title .serif,
+.cta-card h2 .serif {
+  color: #fbbf24 !important; /* warm gold */
+}
+
+/* === FIX: Featured Job background was using var(--text) which flipped to white
+       in the navy dark-mode override, making white text invisible. Force dark bg. === */
+.featured-job {
+  background: #0a0e1a !important;
+}
+.featured-job-image::after {
+  background: linear-gradient(to right, transparent 60%, #0a0e1a 100%) !important;
+}
+.featured-job-content,
+.featured-job-content h2,
+.featured-job-stat .v {
+  color: #ffffff !important;
+}
+.featured-job-content p {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+.featured-job-stat .l {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+.featured-job-stats {
+  border-top-color: rgba(255, 255, 255, 0.18) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+/* === FIX: Hero collage was overflowing onto the headline/CTA on mobile.
+       Replace the absolute-positioned overlapping photos with a clean 2x2 grid. === */
+@media (max-width: 720px) {
+  .hero-collage {
+    position: relative !important;
+    height: auto !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    grid-auto-rows: 140px !important;
+    gap: 10px !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+  .hero-img,
+  .hero-img-1,
+  .hero-img-2,
+  .hero-img-3,
+  .hero-img-4 {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    height: 100% !important;
+    transform: none !important;
+    animation: none !important;
+    border-width: 2px !important;
+    border-radius: 14px !important;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25) !important;
+  }
+  /* Floating badges over the collage no longer have an anchor — hide on mobile */
+  .hero-img-badge {
+    display: none !important;
+  }
+}
+
+/* === FIX: On phones, stack EVERYTHING vertically. No side-by-side. === */
+@media (max-width: 720px) {
+  /* All multi-column grids -> single column */
+  .hero-split,
+  .services-grid,
+  .size-grid,
+  .stats-grid,
+  .testimonials-grid,
+  .areas-inner,
+  .faq-inner,
+  .featured-job-inner,
+  .about-inner,
+  .about-values,
+  .contact-call-meta,
+  .footer-top,
+  .areas-list {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+
+  /* Gallery: one image per row on phones */
+  .gallery-grid {
+    grid-template-columns: 1fr !important;
+    grid-auto-rows: 240px !important;
+  }
+  .gallery-item.size-xl,
+  .gallery-item.size-lg,
+  .gallery-item.size-md,
+  .gallery-item.size-sm,
+  .gallery-item.size-tall {
+    grid-column: span 1 !important;
+    grid-row: span 1 !important;
+  }
+
+  /* Featured-job image fills width above content */
+  .featured-job-image {
+    min-height: 280px !important;
+  }
+  .featured-job-image::after {
+    background: linear-gradient(to bottom, transparent 55%, #0a0e1a 100%) !important;
+  }
+  .featured-job-content {
+    padding: 48px 24px !important;
+  }
+  .featured-job-stats {
+    gap: 18px !important;
+  }
+
+  /* Hero proof bar: stack so nothing gets squeezed */
+  .hero-proof {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+  .hero-proof-divider {
+    display: none !important;
+  }
+
+  /* Make sure flex rows holding buttons or items wrap cleanly */
+  .hero-cta,
+  .nav-cta {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+  .hero-cta .btn,
+  .nav-cta .btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Section padding tightened so stacked content doesn't feel endless */
+  .section {
+    padding: 70px 0 !important;
+  }
 }
 </style>
 </head>
